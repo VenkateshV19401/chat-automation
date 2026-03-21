@@ -1,18 +1,18 @@
 import { AutomationService } from "../services/AutomationService.js";
 
-export function getAutomations(req, res) {
-  res.json(AutomationService.getAutomations(req.user.id));
+export async function getAutomations(req, res) {
+  res.json(await AutomationService.getAutomations(req.user.id));
 }
 
-export function getAutomationForMedia(req, res) {
-  const automation = AutomationService.getAutomationForMedia(req.user.id, req.params.mediaId);
+export async function getAutomationForMedia(req, res) {
+  const automation = await AutomationService.getAutomationForMedia(req.user.id, req.params.mediaId);
   if (!automation) return res.status(404).json({ error: "Automation not found" });
   res.json(automation);
 }
 
-export function createAutomation(req, res) {
+export async function createAutomation(req, res) {
   try {
-    const automation = AutomationService.createAutomation(req.user.id, req.body);
+    const automation = await AutomationService.createAutomation(req.user.id, req.body);
     res.status(201).json(automation);
   } catch (error) {
     if (error.code === "PLAN_LIMIT_REACHED") {
@@ -25,20 +25,20 @@ export function createAutomation(req, res) {
   }
 }
 
-export function updateAutomation(req, res) {
-  const automation = AutomationService.updateAutomation(req.user.id, req.params.id, req.body);
+export async function updateAutomation(req, res) {
+  const automation = await AutomationService.updateAutomation(req.user.id, req.params.id, req.body);
   if (!automation) return res.status(404).json({ error: "Automation not found" });
   res.json(automation);
 }
 
-export function toggleAutomation(req, res) {
-  const automation = AutomationService.toggleAutomation(req.user.id, req.params.id);
+export async function toggleAutomation(req, res) {
+  const automation = await AutomationService.toggleAutomation(req.user.id, req.params.id);
   if (!automation) return res.status(404).json({ error: "Automation not found" });
   res.json(automation);
 }
 
-export function deleteAutomation(req, res) {
-  const automation = AutomationService.deleteAutomation(req.user.id, req.params.id);
+export async function deleteAutomation(req, res) {
+  const automation = await AutomationService.deleteAutomation(req.user.id, req.params.id);
   if (!automation) return res.status(404).json({ error: "Automation not found" });
   res.json({ success: true, automation });
 }

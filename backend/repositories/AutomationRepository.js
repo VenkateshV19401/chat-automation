@@ -1,54 +1,44 @@
-import crypto from "node:crypto";
-import { readDb, writeDb } from "./DatabaseRepository.js";
+import { Automation } from "../models/Automation.js";
+
+function toPlain(doc) {
+  if (!doc) return null;
+  const obj = doc.toObject();
+  obj.id = obj._id.toString();
+  return obj;
+}
 
 export const AutomationRepository = {
-  createAutomation(automation) {
-    const db = readDb();
-    const newAutomation = {
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      ...automation,
-    };
-    db.automations.push(newAutomation);
-    writeDb(db);
-    return newAutomation;
+  async createAutomation(automation) {
+    const doc = await Automation.create(automation);
+    return toPlain(doc);
   },
 
-  getAutomationsByUser(userId) {
-    const db = readDb();
-    return db.automations.filter((automation) => automation.userId === userId);
+  async getAutomationsByUser(userId) {
+    const docs = await Automation.find({ userId });
+    return docs.map(toPlain);
   },
 
-  findAutomationById(id) {
-    const db = readDb();
-    return db.automations.find((automation) => automation.id === id) || null;
+  async findAutomationById(id) {
+    const doc = await Automation.findById(id);
+    return toPlain(doc);
   },
 
-  findAutomationByUserAndMediaId(userId, mediaId) {
-    const db = readDb();
-    return db.automations.find((automation) => automation.userId === userId && automation.targetMediaId === mediaId) || null;
+  async findAutomationByUserAndMediaId(userId, mediaId) {
+    const doc = await Automation.findOne({ userId, targetMediaId: mediaId });
+    return toPlain(doc);
   },
 
-  updateAutomation(id, updates) {
-    const db = readDb();
-    const index = db.automations.findIndex((automation) => automation.id === id);
-    if (index === -1) return null;
-    db.automations[index] = {
-      ...db.automations[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-    writeDb(db);
-    return db.automations[index];
+  async updateAutomation(id, updates) {
+    const doc = await Automation.findByIdAndUpdate(
+      id,
+      { ...updates, updatedAt: new Date() },
+      { new: true }
+    );
+    return toPlain(doc);
   },
 
-  deleteAutomation(id) {
-    const db = readDb();
-    const index = db.automations.findIndex((automation) => automation.id === id);
-    if (index === -1) return null;
-    const deleted = db.automations.splice(index, 1)[0];
-    writeDb(db);
-    return deleted;
+  async deleteAutomation(id) {
+    const doc = await Automation.findByIdAndDelete(id);
+    return toPlain(doc);
   },
 };

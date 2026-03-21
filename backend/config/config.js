@@ -10,6 +10,7 @@ const envPath = path.join(projectRoot, ".env");
 dotenv.config({ path: envPath });
 
 const requiredEnv = [
+  "MONGODB_URI",
   "INSTAGRAM_APP_ID",
   "INSTAGRAM_APP_SECRET",
   "INSTAGRAM_REDIRECT_URI",
@@ -26,6 +27,7 @@ for (const key of requiredEnv) {
 }
 
 export const config = {
+  mongodbUri: process.env.MONGODB_URI || "",
   port: Number(process.env.PORT || 4000),
   frontendUrl: process.env.FRONTEND_URL || "",
   jwtSecret: process.env.JWT_SECRET || "INSTAGRAM_AUTOMATION_SECRET_CHANGE_ME",

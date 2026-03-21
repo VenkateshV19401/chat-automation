@@ -12,12 +12,12 @@ export function getPlans(_req, res) {
 }
 
 // GET /payments/usage — requireAuth
-export function getUsage(req, res) {
-  const user = UserRepository.findUserById(req.user.id);
+export async function getUsage(req, res) {
+  const user = await UserRepository.findUserById(req.user.id);
   if (!user) return res.status(404).json({ error: "User not found" });
 
   const plan = getPlan(user.plan);
-  const usage = UsageRepository.getMonthlyUsage(user.id);
+  const usage = await UsageRepository.getMonthlyUsage(user.id);
 
   res.json({
     plan: user.plan || "free",
@@ -40,7 +40,7 @@ export async function createCheckoutSession(req, res) {
     return res.status(400).json({ error: "Invalid or free plan selected" });
   }
 
-  const user = UserRepository.findUserById(req.user.id);
+  const user = await UserRepository.findUserById(req.user.id);
   if (!user) return res.status(404).json({ error: "User not found" });
 
   try {
@@ -51,7 +51,7 @@ export async function createCheckoutSession(req, res) {
         metadata: { userId: user.id, username: user.username },
       });
       customerId = customer.id;
-      UserRepository.updateUser(user.id, { stripeCustomerId: customerId });
+      await UserRepository.updateUser(user.id, { stripeCustomerId: customerId });
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -73,7 +73,7 @@ export async function createCheckoutSession(req, res) {
 
 // POST /payments/portal — requireAuth
 export async function createPortalSession(req, res) {
-  const user = UserRepository.findUserById(req.user.id);
+  const user = await UserRepository.findUserById(req.user.id);
   if (!user || !user.stripeCustomerId) {
     return res.status(400).json({ error: "No active subscription found" });
   }
@@ -110,7 +110,7 @@ export async function handleStripeWebhook(req, res) {
       const userId = session.metadata?.userId;
       const planId = session.metadata?.planId;
       if (userId && planId) {
-        UserRepository.updateUser(userId, {
+        await UserRepository.updateUser(userId, {
           plan: planId,
           stripeSubscriptionId: session.subscription,
           planActivatedAt: new Date().toISOString(),
@@ -124,7 +124,7 @@ export async function handleStripeWebhook(req, res) {
       const subscription = event.data.object;
       const userId = subscription.metadata?.userId;
       if (userId) {
-        UserRepository.updateUser(userId, {
+        await UserRepository.updateUser(userId, {
           plan: "free",
           stripeSubscriptionId: null,
           planActivatedAt: null,
@@ -137,7 +137,7 @@ export async function handleStripeWebhook(req, res) {
     case "invoice.payment_failed": {
       const invoice = event.data.object;
       const customerId = invoice.customer;
-      const user = UserRepository.findUserByStripeCustomerId(customerId);
+      const user = await UserRepository.findUserByStripeCustomerId(customerId);
       if (user) {
         console.warn(`[payment] Payment failed for user ${user.username} — keeping current plan until Stripe retries`);
       }

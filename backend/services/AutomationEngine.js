@@ -52,7 +52,8 @@ export const AutomationEngine = {
       return;
     }
 
-    const userAutomations = AutomationRepository.getAutomationsByUser(user.id).filter((automation) => {
+    const allAutomations = await AutomationRepository.getAutomationsByUser(user.id);
+    const userAutomations = allAutomations.filter((automation) => {
       return automation.active !== false &&
         automation.triggerType === "comment" &&
         (!automation.targetMediaId || automation.targetMediaId === "any" || automation.targetMediaId === mediaId);
@@ -78,7 +79,7 @@ export const AutomationEngine = {
     console.log(`[engine] Trigger matched \"${matchedAutomation.triggerKeyword}\" for ${user.username}`);
     const replyMessage = matchedAutomation.compiledReplyMessage || matchedAutomation.replyMessage;
     const plan = getPlan(user.plan);
-    const usage = UsageRepository.getMonthlyUsage(user.id);
+    const usage = await UsageRepository.getMonthlyUsage(user.id);
     if (plan.maxRepliesPerMonth !== Infinity && usage.repliesSent >= plan.maxRepliesPerMonth) {
       console.log(`[engine] Monthly reply limit (${plan.maxRepliesPerMonth}) reached for ${user.username}, skipping`);
       return;
@@ -94,6 +95,6 @@ export const AutomationEngine = {
       await InstagramService.sendPrivateReply(commentId, replyMessage, user);
     }
 
-    UsageRepository.incrementReplies(user.id);
+    await UsageRepository.incrementReplies(user.id);
   },
 };

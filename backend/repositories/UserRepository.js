@@ -1,59 +1,55 @@
-import crypto from "node:crypto";
-import { readDb, writeDb } from "./DatabaseRepository.js";
+import { User } from "../models/User.js";
+
+function toPlain(doc) {
+  if (!doc) return null;
+  const obj = doc.toObject();
+  obj.id = obj._id.toString();
+  return obj;
+}
 
 export const UserRepository = {
-  createUser(user) {
-    const db = readDb();
-    const newUser = {
-      id: crypto.randomUUID(),
-      ...user,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    db.users.push(newUser);
-    writeDb(db);
-    return newUser;
+  async createUser(user) {
+    const doc = await User.create(user);
+    return toPlain(doc);
   },
 
-  updateUser(id, updates) {
-    const db = readDb();
-    const index = db.users.findIndex((user) => user.id === id);
-    if (index === -1) return null;
-    db.users[index] = {
-      ...db.users[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-    writeDb(db);
-    return db.users[index];
+  async updateUser(id, updates) {
+    const doc = await User.findByIdAndUpdate(
+      id,
+      { ...updates, updatedAt: new Date() },
+      { new: true }
+    );
+    return toPlain(doc);
   },
 
-  findUserById(id) {
-    const db = readDb();
-    return db.users.find((user) => user.id === id) || null;
+  async findUserById(id) {
+    const doc = await User.findById(id);
+    return toPlain(doc);
   },
 
-  findUserByInstagramUserId(instagramUserId) {
-    const db = readDb();
-    return db.users.find((user) => user.instagramUserId === instagramUserId) || null;
+  async findUserByInstagramUserId(instagramUserId) {
+    const doc = await User.findOne({ instagramUserId });
+    return toPlain(doc);
   },
 
-  findUserByAnyInstagramId(candidateId) {
-    const db = readDb();
-    return db.users.find((user) => [
-      user.instagramUserId,
-      user.instagramLoginId,
-      user.instagramTokenUserId,
-    ].includes(candidateId)) || null;
+  async findUserByAnyInstagramId(candidateId) {
+    const doc = await User.findOne({
+      $or: [
+        { instagramUserId: candidateId },
+        { instagramLoginId: candidateId },
+        { instagramTokenUserId: candidateId },
+      ],
+    });
+    return toPlain(doc);
   },
 
-  findUserByRefreshTokenHash(refreshTokenHash) {
-    const db = readDb();
-    return db.users.find((user) => user.refreshTokenHash === refreshTokenHash) || null;
+  async findUserByRefreshTokenHash(refreshTokenHash) {
+    const doc = await User.findOne({ refreshTokenHash });
+    return toPlain(doc);
   },
 
-  findUserByStripeCustomerId(stripeCustomerId) {
-    const db = readDb();
-    return db.users.find((user) => user.stripeCustomerId === stripeCustomerId) || null;
+  async findUserByStripeCustomerId(stripeCustomerId) {
+    const doc = await User.findOne({ stripeCustomerId });
+    return toPlain(doc);
   },
 };

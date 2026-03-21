@@ -7,12 +7,12 @@
 export const PLANS = {
   free: {
     name: "Free",
-    maxAutomations: 2,
-    maxRepliesPerMonth: 100,
+    maxAutomations: 1,
+    maxRepliesPerMonth: 20,
     canSendDM: true,
     stripePriceId: null,
-    priceUsd: 0,
-    features: ["2 automations", "100 replies/month", "Comment + DM replies"],
+    priceInr: 0,
+    features: ["5 automations", "100 replies/month", "Comment + DM replies"],
   },
   pro: {
     name: "Pro",
@@ -20,7 +20,7 @@ export const PLANS = {
     maxRepliesPerMonth: 5000,
     canSendDM: true,
     stripePriceId: process.env.STRIPE_PRO_PRICE_ID || "",
-    priceUsd: 19.99,
+    priceInr: 499,
     features: ["20 automations", "5,000 replies/month", "Comment + DM replies", "Priority support"],
   },
   business: {
@@ -29,7 +29,7 @@ export const PLANS = {
     maxRepliesPerMonth: Infinity,
     canSendDM: true,
     stripePriceId: process.env.STRIPE_BUSINESS_PRICE_ID || "",
-    priceUsd: 49.99,
+    priceInr: 1499,
     features: ["Unlimited automations", "Unlimited replies", "Comment + DM replies", "Priority support", "Custom branding"],
   },
 };
@@ -44,7 +44,7 @@ export function getPublicPlans() {
     name: plan.name,
     maxAutomations: plan.maxAutomations === Infinity ? "Unlimited" : plan.maxAutomations,
     maxRepliesPerMonth: plan.maxRepliesPerMonth === Infinity ? "Unlimited" : plan.maxRepliesPerMonth,
-    priceUsd: plan.priceUsd,
+    priceInr: plan.priceInr,
     features: plan.features,
   }));
 }

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { config } from "./config/config.js";
+import { connectDb } from "./repositories/DatabaseRepository.js";
 import { requireAuth } from "./middlewares/authMiddleware.js";
 import appRoutes from "./routes/appRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -26,10 +27,13 @@ app.use("/automations", requireAuth, automationRoutes);
 app.use("/webhook", webhookRoutes);
 app.use("/payments", paymentRoutes);
 
-app.listen(config.port, () => {
-  console.log(`Instagram automation server running on http://localhost:${config.port}`);
-  console.log(`[startup] Login route: http://localhost:${config.port}/auth/login`);
-  console.log(`[startup] Webhook route: http://localhost:${config.port}/webhook`);
-  console.log(`[startup] Redirect URI: ${config.redirectUri}`);
-  console.log(`[startup] Verify token: ${config.webhookVerifyToken || "<empty>"}`);
+// Connect to MongoDB then start the server
+connectDb().then(() => {
+  app.listen(config.port, () => {
+    console.log(`Instagram automation server running on http://localhost:${config.port}`);
+    console.log(`[startup] Login route: http://localhost:${config.port}/auth/login`);
+    console.log(`[startup] Webhook route: http://localhost:${config.port}/webhook`);
+    console.log(`[startup] Redirect URI: ${config.redirectUri}`);
+    console.log(`[startup] Verify token: ${config.webhookVerifyToken || "<empty>"}`);
+  });
 });

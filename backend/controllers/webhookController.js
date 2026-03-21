@@ -52,7 +52,7 @@ export async function receiveWebhook(req, res) {
   console.log("Object:", body.object || "<missing>");
 
   for (const entry of body.entry || []) {
-    const user = entry.id ? UserRepository.findUserByAnyInstagramId(String(entry.id)) : null;
+    const user = entry.id ? await UserRepository.findUserByAnyInstagramId(String(entry.id)) : null;
 
     for (const change of entry.changes || []) {
       if (change.field === "comments" || (change.field === "feed" && change.value?.item === "comment")) {

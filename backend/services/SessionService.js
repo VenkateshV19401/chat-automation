@@ -50,7 +50,7 @@ function buildRefreshSessionUpdate(refreshToken) {
   };
 }
 
-function clearStoredSession(userId) {
+async function clearStoredSession(userId) {
   return UserRepository.updateUser(userId, {
     refreshTokenHash: null,
     refreshTokenExpiresAt: null,
@@ -58,16 +58,16 @@ function clearStoredSession(userId) {
 }
 
 export const SessionService = {
-  issueSession(user, res) {
+  async issueSession(user, res) {
     const accessToken = createAccessToken(user);
     const refreshToken = createRefreshToken();
-    const updatedUser = UserRepository.updateUser(user.id, buildRefreshSessionUpdate(refreshToken)) || user;
+    const updatedUser = await UserRepository.updateUser(user.id, buildRefreshSessionUpdate(refreshToken)) || user;
 
     res.cookie(config.refreshCookieName, refreshToken, getCookieOptions());
     return { accessToken, user: updatedUser };
   },
 
-  refreshAccessToken(req, res) {
+  async refreshAccessToken(req, res) {
     const refreshToken = parseCookies(req.headers.cookie || "")[config.refreshCookieName];
     if (!refreshToken) {
       const error = new Error("Missing refresh token");
@@ -75,7 +75,7 @@ export const SessionService = {
       throw error;
     }
 
-    const user = UserRepository.findUserByRefreshTokenHash(hashToken(refreshToken));
+    const user = await UserRepository.findUserByRefreshTokenHash(hashToken(refreshToken));
     if (!user) {
       const error = new Error("Invalid refresh token");
       error.status = 401;
@@ -84,7 +84,7 @@ export const SessionService = {
 
     const expiresAt = user.refreshTokenExpiresAt ? new Date(user.refreshTokenExpiresAt).getTime() : 0;
     if (!expiresAt || expiresAt <= Date.now()) {
-      clearStoredSession(user.id);
+      await clearStoredSession(user.id);
       res.clearCookie(config.refreshCookieName, getCookieOptions());
       const error = new Error("Refresh token expired");
       error.status = 401;
@@ -94,12 +94,12 @@ export const SessionService = {
     return this.issueSession(user, res);
   },
 
-  clearSession(req, res) {
+  async clearSession(req, res) {
     const refreshToken = parseCookies(req.headers.cookie || "")[config.refreshCookieName];
     if (refreshToken) {
-      const user = UserRepository.findUserByRefreshTokenHash(hashToken(refreshToken));
+      const user = await UserRepository.findUserByRefreshTokenHash(hashToken(refreshToken));
       if (user) {
-        clearStoredSession(user.id);
+        await clearStoredSession(user.id);
       }
     }
 

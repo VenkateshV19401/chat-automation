@@ -29,29 +29,29 @@ function toAutomationRecord(userId, payload) {
 }
 
 export const AutomationService = {
-  getAutomations(userId) {
+  async getAutomations(userId) {
     return AutomationRepository.getAutomationsByUser(userId);
   },
 
-  getAutomationForMedia(userId, mediaId) {
+  async getAutomationForMedia(userId, mediaId) {
     if (!mediaId) return null;
     return AutomationRepository.findAutomationByUserAndMediaId(userId, mediaId);
   },
 
-  createAutomation(userId, payload) {
+  async createAutomation(userId, payload) {
     if (!payload.targetMediaId) throw new Error("targetMediaId is required");
     if (!payload.triggerKeyword?.trim()) throw new Error("triggerKeyword is required");
 
-    const user = UserRepository.findUserById(userId);
+    const user = await UserRepository.findUserById(userId);
     const plan = getPlan(user?.plan);
-    const currentCount = AutomationRepository.getAutomationsByUser(userId).length;
-    if (currentCount >= plan.maxAutomations) {
+    const automations = await AutomationRepository.getAutomationsByUser(userId);
+    if (automations.length >= plan.maxAutomations) {
       const error = new Error(`Your ${plan.name} plan allows up to ${plan.maxAutomations} automations. Upgrade to add more.`);
       error.code = "PLAN_LIMIT_REACHED";
       throw error;
     }
 
-    const existing = AutomationRepository.findAutomationByUserAndMediaId(userId, payload.targetMediaId);
+    const existing = await AutomationRepository.findAutomationByUserAndMediaId(userId, payload.targetMediaId);
     if (existing) {
       const error = new Error("Automation already exists for this media");
       error.code = "AUTOMATION_EXISTS";
@@ -62,8 +62,8 @@ export const AutomationService = {
     return AutomationRepository.createAutomation(toAutomationRecord(userId, payload));
   },
 
-  updateAutomation(userId, automationId, payload) {
-    const existing = AutomationRepository.findAutomationById(automationId);
+  async updateAutomation(userId, automationId, payload) {
+    const existing = await AutomationRepository.findAutomationById(automationId);
     if (!existing || existing.userId !== userId) return null;
 
     const updates = toAutomationRecord(userId, {
@@ -75,14 +75,14 @@ export const AutomationService = {
     return AutomationRepository.updateAutomation(automationId, updates);
   },
 
-  toggleAutomation(userId, automationId) {
-    const existing = AutomationRepository.findAutomationById(automationId);
+  async toggleAutomation(userId, automationId) {
+    const existing = await AutomationRepository.findAutomationById(automationId);
     if (!existing || existing.userId !== userId) return null;
     return AutomationRepository.updateAutomation(automationId, { active: !existing.active });
   },
 
-  deleteAutomation(userId, automationId) {
-    const existing = AutomationRepository.findAutomationById(automationId);
+  async deleteAutomation(userId, automationId) {
+    const existing = await AutomationRepository.findAutomationById(automationId);
     if (!existing || existing.userId !== userId) return null;
     return AutomationRepository.deleteAutomation(automationId);
   },

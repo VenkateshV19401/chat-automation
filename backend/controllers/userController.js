@@ -2,7 +2,7 @@ import { UserRepository } from "../repositories/UserRepository.js";
 import { InstagramService } from "../services/InstagramService.js";
 
 export async function getMe(req, res) {
-  const user = UserRepository.findUserById(req.user.id);
+  const user = await UserRepository.findUserById(req.user.id);
   if (!user) return res.status(404).json({ error: "User not found" });
 
   return res.json({
@@ -16,7 +16,7 @@ export async function getMe(req, res) {
 }
 
 export async function getMedia(req, res) {
-  const user = UserRepository.findUserById(req.user.id);
+  const user = await UserRepository.findUserById(req.user.id);
   if (!user) return res.status(404).json({ error: "User not found" });
 
   try {

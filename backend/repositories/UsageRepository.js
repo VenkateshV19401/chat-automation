@@ -1,4 +1,4 @@
-import { readDb, writeDb } from "./DatabaseRepository.js";
+import { Usage } from "../models/Usage.js";
 
 function currentMonth() {
   const now = new Date();
@@ -6,21 +6,19 @@ function currentMonth() {
 }
 
 export const UsageRepository = {
-  getMonthlyUsage(userId) {
-    const db = readDb();
+  async getMonthlyUsage(userId) {
     const month = currentMonth();
-    return db.usage.find((u) => u.userId === userId && u.month === month) || { userId, month, repliesSent: 0 };
+    const doc = await Usage.findOne({ userId, month });
+    if (!doc) return { userId, month, repliesSent: 0 };
+    return { userId: doc.userId, month: doc.month, repliesSent: doc.repliesSent };
   },
 
-  incrementReplies(userId) {
-    const db = readDb();
+  async incrementReplies(userId) {
     const month = currentMonth();
-    const index = db.usage.findIndex((u) => u.userId === userId && u.month === month);
-    if (index === -1) {
-      db.usage.push({ userId, month, repliesSent: 1 });
-    } else {
-      db.usage[index].repliesSent += 1;
-    }
-    writeDb(db);
+    await Usage.findOneAndUpdate(
+      { userId, month },
+      { $inc: { repliesSent: 1 } },
+      { upsert: true }
+    );
   },
 };

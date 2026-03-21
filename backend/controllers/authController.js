@@ -65,7 +65,7 @@ export async function handleInstagramCallback(req, res) {
     }
 
     const instagramUserId = String(profile?.user_id || "");
-    let user = UserRepository.findUserByInstagramUserId(instagramUserId);
+    let user = await UserRepository.findUserByInstagramUserId(instagramUserId);
 
     const userPayload = {
       instagramUserId,
@@ -84,14 +84,14 @@ export async function handleInstagramCallback(req, res) {
     };
 
     if (user) {
-      user = UserRepository.updateUser(user.id, userPayload);
+      user = await UserRepository.updateUser(user.id, userPayload);
     } else {
-      user = UserRepository.createUser(userPayload);
+      user = await UserRepository.createUser(userPayload);
     }
 
     await InstagramService.subscribeToWebhook(finalTokenData.access_token);
 
-    const session = SessionService.issueSession(user, res);
+    const session = await SessionService.issueSession(user, res);
     const appToken = session.accessToken;
 
     if (config.frontendUrl) {
@@ -133,16 +133,16 @@ export async function handleInstagramCallback(req, res) {
   }
 }
 
-export function refreshSession(req, res) {
+export async function refreshSession(req, res) {
   try {
-    const session = SessionService.refreshAccessToken(req, res);
+    const session = await SessionService.refreshAccessToken(req, res);
     return res.json({ token: session.accessToken });
   } catch (error) {
     return res.status(error.status || 500).json({ error: error.message || "Failed to refresh session" });
   }
 }
 
-export function logout(req, res) {
-  SessionService.clearSession(req, res);
+export async function logout(req, res) {
+  await SessionService.clearSession(req, res);
   return res.json({ ok: true });
 }

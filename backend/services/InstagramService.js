@@ -52,7 +52,7 @@ async function getUsableAccessToken(user) {
 
   try {
     const refreshed = await refreshLongLivedAccessToken(user.accessToken);
-    const updatedUser = UserRepository.updateUser(user.id, {
+    const updatedUser = await UserRepository.updateUser(user.id, {
       accessToken: refreshed.access_token || user.accessToken,
       tokenType: refreshed.token_type || user.tokenType || "bearer",
       tokenExpiresIn: refreshed.expires_in || user.tokenExpiresIn || null,
