@@ -15,7 +15,7 @@ export async function GET(request) {
   const user = await UserRepository.findUserById(authUser.id);
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  const plan = getPlan(user.plan);
+  const plan = await getPlan(user.plan);
   const usage = await UsageRepository.getMonthlyUsage(user.id);
 
   return NextResponse.json({

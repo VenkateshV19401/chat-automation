@@ -1,10 +1,12 @@
 // ============================================================
-// PLANS CONFIG — edit this file to change limits, prices, features
-// To change a limit: edit the number below
-// To change a price: update in Stripe dashboard AND update stripePriceId below
+// PLANS CONFIG — static defaults, overridden by MongoDB if configured
+// Admin panel can modify plans at runtime via /admin/plans
 // ============================================================
 
-export const PLANS = {
+import { connectDb } from "@/lib/repositories/DatabaseRepository";
+import { PlanConfig } from "@/lib/models/PlanConfig";
+
+const DEFAULT_PLANS = {
   free: {
     name: "Free",
     maxAutomations: 1,
@@ -25,8 +27,8 @@ export const PLANS = {
   },
   business: {
     name: "Business",
-    maxAutomations: Infinity,
-    maxRepliesPerMonth: Infinity,
+    maxAutomations: -1,
+    maxRepliesPerMonth: -1,
     canSendDM: true,
     stripePriceId: process.env.STRIPE_BUSINESS_PRICE_ID || "",
     priceInr: 1499,
@@ -34,12 +36,50 @@ export const PLANS = {
   },
 };
 
-export function getPlan(planName) {
-  return PLANS[planName] || PLANS.free;
+function normalizePlan(plan) {
+  return {
+    ...plan,
+    maxAutomations: plan.maxAutomations === -1 ? Infinity : plan.maxAutomations,
+    maxRepliesPerMonth: plan.maxRepliesPerMonth === -1 ? Infinity : plan.maxRepliesPerMonth,
+  };
 }
 
-export function getPublicPlans() {
-  return Object.entries(PLANS).map(([key, plan]) => ({
+export async function getPlan(planName) {
+  try {
+    await connectDb();
+    const doc = await PlanConfig.findOne({ planId: planName }).lean();
+    if (doc) return normalizePlan(doc);
+  } catch (_err) {
+    // fallback to static
+  }
+  const plan = DEFAULT_PLANS[planName] || DEFAULT_PLANS.free;
+  return normalizePlan(plan);
+}
+
+export async function getAllPlans() {
+  try {
+    await connectDb();
+    const docs = await PlanConfig.find().lean();
+    if (docs.length > 0) {
+      const plans = {};
+      for (const doc of docs) {
+        plans[doc.planId] = normalizePlan(doc);
+      }
+      return plans;
+    }
+  } catch (_err) {
+    // fallback to static
+  }
+  const plans = {};
+  for (const [key, plan] of Object.entries(DEFAULT_PLANS)) {
+    plans[key] = normalizePlan(plan);
+  }
+  return plans;
+}
+
+export async function getPublicPlans() {
+  const allPlans = await getAllPlans();
+  return Object.entries(allPlans).map(([key, plan]) => ({
     id: key,
     name: plan.name,
     maxAutomations: plan.maxAutomations === Infinity ? "Unlimited" : plan.maxAutomations,
@@ -48,3 +88,5 @@ export function getPublicPlans() {
     features: plan.features,
   }));
 }
+
+export { DEFAULT_PLANS };

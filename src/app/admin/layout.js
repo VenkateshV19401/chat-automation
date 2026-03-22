@@ -4,6 +4,7 @@ import { Box, Drawer, List, ListItemButton, ListItemIcon, ListItemText, Typograp
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
 import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,6 +15,7 @@ const navItems = [
   { label: "Overview", icon: <DashboardRoundedIcon />, path: "/admin" },
   { label: "Users", icon: <PeopleRoundedIcon />, path: "/admin/users" },
   { label: "Automations", icon: <SmartToyRoundedIcon />, path: "/admin/automations" },
+  { label: "Plans", icon: <TuneRoundedIcon />, path: "/admin/plans" },
 ];
 
 export default function AdminLayout({ children }) {

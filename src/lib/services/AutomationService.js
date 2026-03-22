@@ -43,7 +43,7 @@ export const AutomationService = {
     if (!payload.triggerKeyword?.trim()) throw new Error("triggerKeyword is required");
 
     const user = await UserRepository.findUserById(userId);
-    const plan = getPlan(user?.plan);
+    const plan = await getPlan(user?.plan);
     const automations = await AutomationRepository.getAutomationsByUser(userId);
     if (automations.length >= plan.maxAutomations) {
       const error = new Error(`Your ${plan.name} plan allows up to ${plan.maxAutomations} automations. Upgrade to add more.`);

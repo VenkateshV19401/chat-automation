@@ -69,7 +69,7 @@ export const AutomationEngine = {
 
     console.log(`[engine] Trigger matched "${matchedAutomation.triggerKeyword}" for ${user.username}`);
     const replyMessage = matchedAutomation.compiledReplyMessage || matchedAutomation.replyMessage;
-    const plan = getPlan(user.plan);
+    const plan = await getPlan(user.plan);
     const usage = await UsageRepository.getMonthlyUsage(user.id);
     if (plan.maxRepliesPerMonth !== Infinity && usage.repliesSent >= plan.maxRepliesPerMonth) {
       console.log(`[engine] Monthly reply limit (${plan.maxRepliesPerMonth}) reached for ${user.username}, skipping`);
