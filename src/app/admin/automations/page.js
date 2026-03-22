@@ -2,7 +2,7 @@
 
 import {
   Alert, Box, Card, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
-  Button, IconButton, Switch, Table, TableBody, TableCell, TableContainer,
+  Button, IconButton, Stack, Switch, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Typography, CircularProgress, TextField,
 } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
