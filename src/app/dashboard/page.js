@@ -28,6 +28,7 @@ import {
   Tabs,
   Tooltip,
   Typography,
+  Avatar,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -220,7 +221,8 @@ export default function DashboardPage() {
         <Typography variant="h6" sx={{ fontWeight: 700, color: "text.primary" }}>
           Insta<span style={{ color: "#3b82f6" }}>Flow</span>
         </Typography>
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Avatar src={profile?.profilePictureUrl} sx={{ width: 30, height: 30 }}>{profile?.username?.[0]?.toUpperCase()}</Avatar>
           <Typography variant="body2" sx={{ mr: 1, color: "text.secondary" }}>@{profile?.username}</Typography>
           <Tooltip title="Logout">
             <IconButton size="small" onClick={handleLogout} sx={{ color: "text.secondary" }}>

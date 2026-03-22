@@ -62,7 +62,7 @@ export async function refreshLongLivedAccessToken(accessToken) {
 export async function fetchInstagramProfile(accessToken) {
   const response = await axios.get(INSTAGRAM_GRAPH_ME_URL, {
     params: {
-      fields: "user_id,username,account_type",
+      fields: "user_id,username,account_type,profile_picture_url",
       access_token: accessToken,
     },
   });

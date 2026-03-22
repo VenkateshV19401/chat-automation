@@ -5,6 +5,7 @@ import {
   FormControl, IconButton, InputLabel, MenuItem, Select, Switch, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Typography, CircularProgress, TextField,
 } from "@mui/material";
+import Avatar from "@mui/material/Avatar";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import { useEffect, useState } from "react";
@@ -92,8 +93,13 @@ export default function AdminUsersPage() {
               {filtered.map((user) => (
                 <TableRow key={user.id} hover>
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>@{user.username}</Typography>
-                    {user.isManualGrant && <Chip label="Manual" size="small" sx={{ ml: 1, height: 18, fontSize: "0.65rem" }} />}
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <Avatar src={user.profilePictureUrl} sx={{ width: 32, height: 32 }}>{user.username?.[0]?.toUpperCase()}</Avatar>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>@{user.username}</Typography>
+                        {user.isManualGrant && <Chip label="Manual" size="small" sx={{ height: 18, fontSize: "0.65rem" }} />}
+                      </Box>
+                    </Stack>
                   </TableCell>
                   <TableCell>
                     <Chip label={user.plan.toUpperCase()} size="small" color={planColors[user.plan] || "default"} />

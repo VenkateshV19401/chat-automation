@@ -28,6 +28,7 @@ export async function GET(request) {
     const result = users.map((u) => ({
       id: u._id.toString(),
       username: u.username,
+      profilePictureUrl: u.profilePictureUrl || "",
       instagramUserId: u.instagramUserId,
       accountType: u.accountType,
       plan: u.plan || "free",

@@ -5,6 +5,7 @@ import {
   Button, IconButton, Switch, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Typography, CircularProgress, TextField,
 } from "@mui/material";
+import Avatar from "@mui/material/Avatar";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useEffect, useState } from "react";
 
@@ -90,7 +91,10 @@ export default function AdminAutomationsPage() {
               {filtered.map((a) => (
                 <TableRow key={a.id} hover>
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>@{a.username}</Typography>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Avatar src={a.profilePictureUrl} sx={{ width: 28, height: 28 }}>{a.username?.[0]?.toUpperCase()}</Avatar>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>@{a.username}</Typography>
+                    </Stack>
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>&ldquo;{a.triggerKeyword}&rdquo;</Typography>

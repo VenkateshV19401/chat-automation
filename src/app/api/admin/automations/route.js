@@ -14,12 +14,17 @@ export async function GET(request) {
     const userIds = [...new Set(automations.map((a) => a.userId))];
     const users = await User.find({ _id: { $in: userIds } }).lean();
     const userMap = {};
-    for (const u of users) userMap[u._id.toString()] = u.username;
+    const userPicMap = {};
+    for (const u of users) {
+      userMap[u._id.toString()] = u.username;
+      userPicMap[u._id.toString()] = u.profilePictureUrl || "";
+    }
 
     const result = automations.map((a) => ({
       id: a._id.toString(),
       userId: a.userId,
       username: userMap[a.userId] || "Unknown",
+      profilePictureUrl: userPicMap[a.userId] || "",
       triggerKeyword: a.triggerKeyword,
       matchType: a.matchType,
       replyType: a.replyType,

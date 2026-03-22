@@ -50,6 +50,7 @@ export async function GET(request) {
       instagramLoginId: profile?.id ? String(profile.id) : "",
       instagramTokenUserId: finalTokenData.user_id ? String(finalTokenData.user_id) : "",
       username: profile?.username || "",
+      profilePictureUrl: profile?.profile_picture_url || "",
       accountType: profile?.account_type || "",
       accessToken: finalTokenData.access_token,
       tokenType: finalTokenData.token_type || "bearer",

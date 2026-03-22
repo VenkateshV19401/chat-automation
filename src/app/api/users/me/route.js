@@ -16,6 +16,7 @@ export async function GET(request) {
   return NextResponse.json({
     id: user.id,
     username: user.username,
+    profilePictureUrl: user.profilePictureUrl,
     accountType: user.accountType,
     instagramUserId: user.instagramUserId,
     permissions: user.permissions,

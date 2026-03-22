@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema(
     instagramLoginId: { type: String },
     instagramTokenUserId: { type: String },
     username: { type: String },
+    profilePictureUrl: { type: String },
     accountType: { type: String },
     accessToken: { type: String },
     permissions: [{ type: String }],
