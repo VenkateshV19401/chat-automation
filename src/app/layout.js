@@ -4,6 +4,17 @@ import MuiProvider from "../components/MuiProvider";
 export const metadata = {
   title: "InstaFlow - Instagram Automation Platform",
   description: "Automate Instagram comment replies and DMs to grow your business on autopilot.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
+  openGraph: {
+    title: "InstaFlow - Instagram Automation Platform",
+    description: "Automate Instagram comment replies and DMs to grow your business on autopilot.",
+    siteName: "InstaFlow",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }) {
