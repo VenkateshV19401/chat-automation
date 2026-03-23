@@ -9,7 +9,7 @@ export function verifyAdminCredentials(email, password) {
 }
 
 export function createAdminToken() {
-  return jwt.sign({ role: "admin", email: ADMIN_EMAIL }, ADMIN_JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ role: "admin", email: ADMIN_EMAIL }, ADMIN_JWT_SECRET, { expiresIn: "1h" });
 }
 
 export function requireAdmin(request) {

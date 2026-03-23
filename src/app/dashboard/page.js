@@ -9,6 +9,10 @@ import PhotoLibraryRoundedIcon from "@mui/icons-material/PhotoLibraryRounded";
 import ChatBubbleOutlineRoundedIcon from "@mui/icons-material/ChatBubbleOutlineRounded";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import {
   Alert,
   Box,
@@ -22,6 +26,10 @@ import {
   Grid,
   IconButton,
   LinearProgress,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Stack,
   Switch,
   Tab,
@@ -31,7 +39,7 @@ import {
   Avatar,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { deleteAutomation, getAutomations, getMe, getMedia, getUsage, createPortalSession, logoutSession, toggleAutomation } from "../../lib/api";
 
 function MediaCard({ item, automated, onSelect }) {
@@ -130,6 +138,7 @@ export default function DashboardPage() {
   const [mainTab, setMainTab] = useState(0);
   const [mediaTab, setMediaTab] = useState(0);
   const [error, setError] = useState("");
+  const [profileAnchor, setProfileAnchor] = useState(null);
 
   const automationByMediaId = useMemo(() => new Map(automations.map((item) => [item.targetMediaId, item])), [automations]);
   const posts = useMemo(() => media.filter((item) => item.media_type === "IMAGE" || item.media_type === "CAROUSEL_ALBUM"), [media]);
@@ -221,15 +230,81 @@ export default function DashboardPage() {
         <Typography variant="h6" sx={{ fontWeight: 700, color: "text.primary" }}>
           Insta<span style={{ color: "#3b82f6" }}>Flow</span>
         </Typography>
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <Avatar src={profile?.profilePictureUrl} sx={{ width: 30, height: 30 }}>{profile?.username?.[0]?.toUpperCase()}</Avatar>
-          <Typography variant="body2" sx={{ mr: 1, color: "text.secondary" }}>@{profile?.username}</Typography>
-          <Tooltip title="Logout">
-            <IconButton size="small" onClick={handleLogout} sx={{ color: "text.secondary" }}>
-              <LogoutRoundedIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          onClick={(e) => setProfileAnchor(e.currentTarget)}
+          sx={{ cursor: "pointer", px: 1.5, py: 0.5, borderRadius: 2, "&:hover": { bgcolor: "rgba(0,0,0,0.04)" }, transition: "background 0.15s" }}
+        >
+          <Avatar src={profile?.profilePictureUrl} sx={{ width: 32, height: 32, border: "2px solid rgba(59,130,246,0.3)" }}>
+            {profile?.username?.[0]?.toUpperCase()}
+          </Avatar>
+          <Typography variant="body2" sx={{ fontWeight: 500, color: "text.primary" }}>@{profile?.username}</Typography>
         </Stack>
+
+        <Menu
+          anchorEl={profileAnchor}
+          open={Boolean(profileAnchor)}
+          onClose={() => setProfileAnchor(null)}
+          PaperProps={{
+            sx: { mt: 1, minWidth: 260, borderRadius: 3, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", border: "1px solid rgba(0,0,0,0.06)" },
+          }}
+          transformOrigin={{ horizontal: "right", vertical: "top" }}
+          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        >
+          {/* Profile Header */}
+          <Box sx={{ px: 2.5, py: 2, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Avatar src={profile?.profilePictureUrl} sx={{ width: 44, height: 44, border: "2px solid rgba(59,130,246,0.2)" }}>
+                {profile?.username?.[0]?.toUpperCase()}
+              </Avatar>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>@{profile?.username}</Typography>
+                <Typography variant="caption" sx={{ color: "text.secondary" }}>{profile?.accountType || "Business"} Account</Typography>
+              </Box>
+            </Stack>
+          </Box>
+
+          {/* Plan Info */}
+          <Box sx={{ px: 2.5, py: 1.5, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Stack direction="row" spacing={1} alignItems="center">
+                <StarRoundedIcon sx={{ fontSize: 18, color: usage?.plan === "free" ? "#9ca3af" : "#f59e0b" }} />
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>{usage?.planName || "Free"} Plan</Typography>
+              </Stack>
+              <Chip label={usage?.plan?.toUpperCase()} size="small" sx={{ height: 20, fontSize: "0.65rem", fontWeight: 700, bgcolor: usage?.plan === "free" ? "rgba(0,0,0,0.06)" : "rgba(59,130,246,0.1)", color: usage?.plan === "free" ? "text.secondary" : "#3b82f6" }} />
+            </Stack>
+            <Stack spacing={0.5} sx={{ mt: 1.5 }}>
+              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                Automations: {automations.length} / {usage?.usage?.maxAutomations ?? "∞"}
+              </Typography>
+              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                Replies: {usage?.usage?.repliesSent || 0} / {usage?.usage?.maxRepliesPerMonth ?? "∞"}
+              </Typography>
+            </Stack>
+          </Box>
+
+          {/* Menu Items */}
+          {usage?.plan === "free" ? (
+            <MenuItem onClick={() => { setProfileAnchor(null); router.push("/pricing"); }}>
+              <ListItemIcon><PaymentRoundedIcon fontSize="small" sx={{ color: "#3b82f6" }} /></ListItemIcon>
+              <ListItemText primary="Upgrade Plan" primaryTypographyProps={{ variant: "body2", fontWeight: 500 }} />
+            </MenuItem>
+          ) : (
+            <MenuItem onClick={() => { setProfileAnchor(null); handleManageBilling(); }}>
+              <ListItemIcon><PaymentRoundedIcon fontSize="small" /></ListItemIcon>
+              <ListItemText primary="Manage Billing" primaryTypographyProps={{ variant: "body2" }} />
+            </MenuItem>
+          )}
+
+          <Divider />
+
+          <MenuItem onClick={() => { setProfileAnchor(null); handleLogout(); }} sx={{ color: "#ef4444" }}>
+            <ListItemIcon><LogoutRoundedIcon fontSize="small" sx={{ color: "#ef4444" }} /></ListItemIcon>
+            <ListItemText primary="Logout" primaryTypographyProps={{ variant: "body2", fontWeight: 500 }} />
+          </MenuItem>
+        </Menu>
       </Box>
 
       <Box sx={{ px: { xs: 2, md: 4 }, py: 3, maxWidth: 1400, mx: "auto" }}>
